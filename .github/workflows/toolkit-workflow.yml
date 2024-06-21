@@ -3,7 +3,7 @@ name: toolkit-workflow
 on:  
   workflow_dispatch:
     inputs:  
-      OS: 
+      OS:   
         description: 'OS to build'
         required: true
       BUILD_VARS_JSON:
