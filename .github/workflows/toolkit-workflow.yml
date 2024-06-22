@@ -36,12 +36,6 @@ jobs:
             echo "Dependencies:"
             cat deps.txt
             
-      - name: Set dependencies as outputs
-        id: set_deps
-        run: |
-            DEPS=$(cat deps.txt)
-            echo "DEPS=$DEPS" >> $GITHUB_ENV
-            
       - name: Download artifacts
         run: |
             mkdir -p artifacts
