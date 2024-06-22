@@ -29,6 +29,37 @@ jobs:
         run: |
           echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq .
 
+      - name: Extract dependencies
+        id: extract_deps
+        run: |
+            echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r '.repos[] | select(.name == "${{ github.event.repository.name }}") | .deps[]' > deps.txt
+            echo "Dependencies:"
+            cat deps.txt
+            
+      - name: Set dependencies as outputs
+        id: set_deps
+        run: |
+            DEPS=$(cat deps.txt)
+            echo "DEPS=$DEPS" >> $GITHUB_ENV
+            
+      - name: Download artifacts
+        run: |
+            mkdir -p artifacts
+            while IFS= read -r repo; do
+              echo "Downloading artifact for $repo"
+              run_id=$(echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r ".buildids | .[\"$repo\"]")
+              echo "rund id $run_id"
+              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-${{ github.event.inputs.OS }}"  
+              artifact_path="artifacts/$repo"
+              echo "list artifact path"
+              ls -al "$artifact_path"
+              mkdir -p artifacts/RPMS
+              echo "copy to the artifacts RPM dir"
+              cp "$artifact_path"/RPMS/*.rpm artifacts/RPMS
+            done < deps.txt
+        env:
+            GITHUB_TOKEN: ${{ secrets.GIT_ACTIONS }}
+
       - name: Delete current repo from build
         id: modify_json
         run: |
@@ -42,7 +73,6 @@ jobs:
           echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
           echo "**** next next ****"
           echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
-
    
       - name: Use modified BUILD_VARS_JSON
         run: |
