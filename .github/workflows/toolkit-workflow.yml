@@ -34,14 +34,7 @@ jobs:
         run: |
             git clone https://github.com/cs1867/project.git project
             cp project/toolbox/workflows/toolkit_test.json  ./toolkit_test.json
-            pwd
-            ls -al 
-            cat toolkit_test.json
-            echo "set build vars"
-            BUILD_VARS_JSON=$(echo "$toolkit_test.json" | jq -c '.')
-            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
-            echo "**** next next ****"
-            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
+
 
       - name: Pretty-print BUILD_VARS_JSON
         run: |
