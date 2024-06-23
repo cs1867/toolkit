@@ -38,6 +38,7 @@ jobs:
             echo "BUILD_VARS_JSON=$(cat build_vars.json)" >> $GITHUB_ENV
             pwd
             ls -al 
+            echo  build_vars.json | jq .
 
       - name: Pretty-print BUILD_VARS_JSON
         run: |
