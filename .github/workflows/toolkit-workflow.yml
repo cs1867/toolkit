@@ -37,9 +37,10 @@ jobs:
             pwd
             ls -al 
             cat build_vars.json
-            build_vars_content=$(echo "$cat build_vars.json" | jq -c '.')
-          
-        # echo "BUILD_VARS_JSON=$build_vars_content" >> $GITHUB_ENV
+            BUILD_VARS_JSON=$(echo "$build_vars.json" | jq -c '.')
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
+            echo "**** next next ****"
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
 
       - name: Pretty-print BUILD_VARS_JSON
         run: |
