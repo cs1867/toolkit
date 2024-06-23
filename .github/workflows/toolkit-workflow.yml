@@ -33,7 +33,7 @@ jobs:
              github-token: ${{ secrets.GIT_ACTIONS }}
         run: |
             git clone https://github.com/cs1867/project.git project
-            cp project/toolbox/workflows/toolkit-test.json  ./build_vars.json
+            cp project/toolbox/workflows/build_vars.json  ./build_vars.json
             pwd
             ls -al 
             cat build_vars.json
