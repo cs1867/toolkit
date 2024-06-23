@@ -34,7 +34,6 @@ jobs:
         run: |
             git clone https://github.com/cs1867/project.git project
             cp project/toolbox/workflows/toolkit-test.json  build_vars.json
-            echo "BUILD_VARS_JSON=$(cat build_vars.json)" >> $GITHUB_ENV
             pwd
             ls -al 
             echo '${{ env.BUILD_VARS_JSON }}' 
