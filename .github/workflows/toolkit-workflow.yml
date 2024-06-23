@@ -38,7 +38,7 @@ jobs:
             ls -al 
             cat toolkit_test.json
             echo "set build vars"
-            BUILD_VARS_JSON=$(echo "$toolkit_test.json" )
+            BUILD_VARS_JSON=$(echo "$toolkit_test.json" | jq -c '.')
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
             echo "**** next next ****"
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
