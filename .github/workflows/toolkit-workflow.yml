@@ -37,7 +37,8 @@ jobs:
             pwd
             ls -al 
             cat build_vars.json
-            BUILD_VARS_JSON=$(echo "$toolkit-test.json )
+            echo "set build vars"
+            BUILD_VARS_JSON=$(echo "$toolkit-test.json" )
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
             echo "**** next next ****"
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
