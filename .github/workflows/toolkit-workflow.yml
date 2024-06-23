@@ -33,12 +33,12 @@ jobs:
              github-token: ${{ secrets.GIT_ACTIONS }}
         run: |
             git clone https://github.com/cs1867/project.git project
-            cp project/toolbox/workflows/build_vars.json  ./build_vars.json
+            cp project/toolbox/workflows/toolkit_test.json  ./build_vars.json
             pwd
             ls -al 
-            cat build_vars.json
+            cat toolkit_test.json
             echo "set build vars"
-            BUILD_VARS_JSON=$(echo "$toolkit-test.json" )
+            BUILD_VARS_JSON=$(echo "$toolkit_test.json" )
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
             echo "**** next next ****"
             echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
