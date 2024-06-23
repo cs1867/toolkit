@@ -1,8 +1,8 @@
 name: toolkit-workflow
   
 on:
- # push:
- #   branches: [ 'github-workflow' ] 
+  push:
+    branches: [ 'github-workflow' ] 
   workflow_dispatch:
     inputs:  
       OS:   
@@ -26,6 +26,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 5.2.0
+          
+      - name: Fetch build_vars.json from projects
+        if: github.event_name == 'push'
+        env:
+             github-token: ${{ secrets.GIT_ACTIONS }}
+        run: |
+            git clone https://github.com/cs1867/project.git project
+            ls -al project
+            cp project/toolbox/workflows/toolkit-test.json  build_vars.json
+            echo "BUILD_VARS_JSON=$(cat build_vars.json)" >> $GITHUB_ENV
+            pwd
+            ls -al 
 
       - name: Pretty-print BUILD_VARS_JSON
         run: |
