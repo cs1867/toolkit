@@ -33,9 +33,10 @@ jobs:
              github-token: ${{ secrets.GIT_ACTIONS }}
         run: |
             git clone https://github.com/cs1867/project.git project
-            cp project/toolbox/workflows/toolkit-test.json  build_vars.json
+            cp project/toolbox/workflows/toolkit-test.json  ./build_vars.json
             pwd
             ls -al 
+            cat build_vars.json
             echo '${{ env.BUILD_VARS_JSON }}' 
 
       - name: Pretty-print BUILD_VARS_JSON
