@@ -1,8 +1,6 @@
-name: toolkit-workflow
+name: test-workflow
         
 on:  
-  schedule: 
-    - cron: "0 13 * * *"  
   push:
     branches: [ 'github-workflow' ] 
   workflow_run:
@@ -16,7 +14,7 @@ env:
  
 jobs:
        
-  toolkit-packages:
+  build-testing:
      strategy:
       #fail-fast: true
       matrix:
