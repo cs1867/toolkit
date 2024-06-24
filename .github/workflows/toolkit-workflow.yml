@@ -1,76 +1,59 @@
-name: test-workflow
-        
-on:  
-  push:
-    branches: [ 'github-workflow' ] 
+name: toolkit-workflow
+     
+on:
+  workflow_dispatch:
+    inputs:   
+      OS:  
+        description: 'OS to build'
+        required: true
+      BUILD_VARS_JSON:
+        description: 'Build var json file'
+        required: true
+         
   workflow_run:
-    workflows: "Create Artifacts and pass runid"   
-    branches: [ 'github-workflow' ]    
-    types:   
-      - completed       
-  workflow_dispatch: 
-env: 
-  RUN_ID: ${{ github.run_id }} 
- 
+    workflows: "Create Artifacts and pass runid"
+    branches: 'github-workflow'
+    types:
+      - completed
+
 jobs:
        
-  build-testing:
-     strategy:
-      #fail-fast: true
-      matrix:
-          #os: [  'd12'  ]
-          #os: [  'ol8', 'el9', 'd10', 'u18', 'u20'  ]
-          os: [ 'ol8'   ]
-     runs-on: ubuntu-latest
+  build-toolkit:
 
+     runs-on: ubuntu-latest
+     
      steps:
         - name: Check out Repo
           uses: actions/checkout@v4
           with:
            ref: 5.2.0
 
-        - name: list dirs
-          run: |
-            ls -al 
-            echo '${{ github.run_id }}'
-        - name: Fetch build_vars.json from projects
+        - name: Fetch workflow script from projects
           env:
              github-token: ${{ secrets.GIT_ACTIONS }}
           run: |
             git clone https://github.com/cs1867/project.git project
-            ls -al project
-            cp project/toolbox/workflows/repo_test.json .
-            cp project/toolbox/workflows/github-workflow-addrepo.sh . 
-            ls -al 
- 
-        - name: Set build_vars.json as workflow variable
-          id: set_build_vars
-          run: |
-           BUILD_VARS_JSON=$(jq -c . repo_test.json )
-           echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}" >> $GITHUB_ENV
-           echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}"
+            cp project/toolbox/workflows/github-workflow-addrepo.sh .    
         
-        - name:  cat repo_test.json
+        - name: Pretty-print BUILD_VARS_JSON
           run: |
-            cat repo_test.json 
+            echo '${{ github.event.inputs.BUILD_VARS_JSON }}'  
             
         - name: Extract dependencies
           id: extract_deps
           run: |
-            cat repo_test.json  | jq -r '.repos[] | select(.name == "${{ github.event.repository.name }}") | .deps[]' > deps.txt
+            echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r '.repos[] | select(.name == "${{ github.event.repository.name }}") | .deps[]' > deps.txt
             echo "Dependencies:"
             cat deps.txt
-            
+       
         - name: Download artifacts
           run: |
             mkdir -p artifacts
-            cat deps.txt
             while IFS= read -r repo; do
               echo "Downloading artifact for $repo"
-              run_id=$(cat repo_test.json | jq -r ".buildids | .[\"$repo\"]")
-              echo "rund id $run_id"
-              echo "repo $repo"
-              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-${{ matrix.os }}"  
+              run_id=$(echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r ".buildids | .[\"$repo\"]")
+              echo "run id $run_id"
+              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-${{ github.event.inputs.OS }}"  
               artifact_path="artifacts/$repo"
               echo "list artifact path"
               ls -al "$artifact_path"
@@ -80,13 +63,70 @@ jobs:
             done < deps.txt
           env:
             GITHUB_TOKEN: ${{ secrets.GIT_ACTIONS }}
-           
+
         - name: run docker oneshot builder
           run: |
-           curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build | sh -s - --run github-workflow-addrepo.sh . '${{ matrix.os }}'
-       
+           curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build |  sh -s - --run github-workflow-addrepo.sh . '${{ github.event.inputs.OS }}'   
+            
         - uses: actions/upload-artifact@v3
           with:
-            name: ${{ github.event.repository.name }}-${{ matrix.os }}
+            name: ${{ github.event.repository.name }}-${{ github.event.inputs.OS }}
             path: unibuild-repo
             retention-days: 5
+            
+        - name: Delete current repo from build
+          id: modify_json
+          run: |
+            modified_json=$(echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq 'del(.repos[0])')
+            echo "Modified JSON:"
+            echo "$modified_json" | jq .
+            BUILD_VARS_JSON=$(echo "$modified_json" | jq -c '.')
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
+            echo "**** next next ****"
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"
+            
+        - name: Use modified BUILD_VARS_JSON
+          run: |
+            echo "Using the modified BUILD_VARS_JSON environment variable:"
+            echo "$BUILD_VARS_JSON" | jq .
+     
+        - name: Look up the next repo name to build
+          id: extract_repo_name
+          run: |
+            echo "BUILD_VARS_JSON value is: $BUILD_VARS_JSON"
+            NEXTREPO=$(echo  "$BUILD_VARS_JSON"  | jq -r '.repos[0].name' )
+            echo "NEXTREPO=$NEXTREPO" >> $GITHUB_ENV  
+            
+        - name: Display NEXTREPO value
+          run: echo "The value of NEXTREPO is $NEXTREPO"  
+
+        - name: Add GitHub run ID to buildids
+          id: add_run_id
+          run: |
+            GITHUB_RUN_ID=${{ github.run_id }}
+            modified_json=$(echo "$BUILD_VARS_JSON"  | jq --arg run_id "$GITHUB_RUN_ID" '.buildids."${{ github.event.repository.name }}" = $run_id' )
+            echo "Modified JSON with GitHub run ID:"
+            echo "$modified_json" | jq .
+            BUILD_VARS_JSON=$(echo "$modified_json" | jq -c '.')
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON" >> $GITHUB_ENV
+            echo "BUILD_VARS_JSON=$BUILD_VARS_JSON"  
+            
+        - name: Use modified BUILD_VARS_JSON with run id
+          run: |
+            echo "Using the modified BUILD_VARS_JSON environment variable:"
+            echo "$BUILD_VARS_JSON" | jq .
+        - name: Pass workflow  
+          uses: actions/github-script@v6
+          with: 
+            github-token: ${{ secrets.GIT_ACTIONS }}
+            script: |
+              await github.rest.actions.createWorkflowDispatch({
+              owner: 'cs1867',
+              repo: '${{ env.NEXTREPO}}',
+              workflow_id: '${{ env.NEXTREPO}}-workflow.yml',
+              ref: 'github-workflow',
+               inputs: {
+                OS:  '${{ github.event.inputs.OS }}',
+                BUILD_VARS_JSON: '${{ env.BUILD_VARS_JSON}}'
+              }
+              })
