@@ -60,6 +60,7 @@ jobs:
         - name: Download artifacts
           run: |
             mkdir -p artifacts
+            cat deps.txt
             while IFS= read -r repo; do
               echo "Downloading artifact for $repo"
               run_id=$(echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r ".buildids | .[\"$repo\"]")
