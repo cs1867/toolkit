@@ -65,7 +65,8 @@ jobs:
               echo "Downloading artifact for $repo"
               run_id=$(cat toolkit_test.json  | jq -r ".buildids | .[\"$repo\"]")
               echo "rund id $run_id"
-              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-${{ github.event.inputs.OS }}"  
+              echo "repo $repo"
+              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-ol8"  
               artifact_path="artifacts/$repo"
               echo "list artifact path"
               ls -al "$artifact_path"
