@@ -16,7 +16,7 @@ env:
  
 jobs:
        
-  build-minor-packages:
+  toolkit-packages:
      strategy:
       #fail-fast: true
       matrix:
@@ -66,7 +66,7 @@ jobs:
               run_id=$(cat toolkit_test.json  | jq -r ".buildids | .[\"$repo\"]")
               echo "rund id $run_id"
               echo "repo $repo"
-              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-ol8"  
+              gh run download $run_id --repo cs1867/$repo -D artifacts/$repo --name "$repo-${{ matrix.os }}"  
               artifact_path="artifacts/$repo"
               echo "list artifact path"
               ls -al "$artifact_path"
@@ -77,18 +77,14 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.GIT_ACTIONS }}
            
-        #- name: run docker oneshot builder
-        #  run: |
-        #   curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build | sh -s - . '${{ matrix.os }}'
+        - name: run docker oneshot builder
+          run: |
+           curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build | sh -s - . '${{ matrix.os }}'
        
-        #Stash the artifacts
         - uses: actions/upload-artifact@v3
           with:
-            # Name the artifact uniquely
             name: ${{ github.event.repository.name }}-${{ matrix.os }}
-            # Where the finished product lives after the build
             path: unibuild-repo
-            # Don't keep these for long.  This is just a test.
             retention-days: 5
 
 
