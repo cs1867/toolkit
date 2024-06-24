@@ -38,13 +38,6 @@ jobs:
             git clone https://github.com/cs1867/project.git project
             ls -al project
             cp project/toolbox/workflows/toolkit_test.json .
-
-        - name: Extract repo name
-          id: extract_repo_name
-          run: |
-            jq -r '.repos[0].name' toolkit_test.json
-            NEXTREPO=$(jq -r '.repos[0].name' toolkit_test.json)
-            echo "NEXTREPO=${NEXTREPO}" >> $GITHUB_ENV  
  
         - name: Set build_vars.json as workflow variable
           id: set_build_vars
@@ -53,14 +46,14 @@ jobs:
            echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}" >> $GITHUB_ENV
            echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}"
         
-        - name: Pretty-print BUILD_VARS_JSON
+        - name:  cat toolkit_test.json 
           run: |
-            echo '${{ github.event.inputs.BUILD_VARS_JSON }}'
+            cat toolkit_test.json 
             
         - name: Extract dependencies
           id: extract_deps
           run: |
-            echo '${{ github.event.inputs.BUILD_VARS_JSON }}' | jq -r '.repos[] | select(.name == "${{ github.event.repository.name }}") | .deps[]' > deps.txt
+            cat toolkit_test.json  | jq -r '.repos[] | select(.name == "${{ github.event.repository.name }}") | .deps[]' > deps.txt
             echo "Dependencies:"
             cat deps.txt
             
