@@ -37,19 +37,19 @@ jobs:
           run: |
             git clone https://github.com/cs1867/project.git project
             ls -al project
-            cp project/toolbox/workflows/build_vars.json .
+            cp project/toolbox/workflows/toolkit_test.json .
 
         - name: Extract repo name
           id: extract_repo_name
           run: |
-            jq -r '.repos[0].name' build_vars.json
-            NEXTREPO=$(jq -r '.repos[0].name' build_vars.json )
+            jq -r '.repos[0].name' toolkit_test.json
+            NEXTREPO=$(jq -r '.repos[0].name' toolkit_test.json)
             echo "NEXTREPO=${NEXTREPO}" >> $GITHUB_ENV  
  
         - name: Set build_vars.json as workflow variable
           id: set_build_vars
           run: |
-           BUILD_VARS_JSON=$(jq -c . build_vars.json)
+           BUILD_VARS_JSON=$(jq -c . toolkit_test.json )
            echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}" >> $GITHUB_ENV
            echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}"
         
