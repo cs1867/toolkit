@@ -97,24 +97,6 @@ jobs:
             retention-days: 5
 
 
-        - name: update build_vars.json
-          run: |
-           jq 'del(.repos[0])' build_vars.json > tmp.json
-           mv tmp.json  build_vars.json
-           jq --arg run_id "${{ github.run_id }}" '.buildids += { "minor-packages": $run_id }'  build_vars.json  > tmp.json
-           mv tmp.json  build_vars.json
             
-        - name: Extract repo name
-          id: extract_repo_name2
-          run: |
-            jq -r '.repos[0].name' build_vars.json
-            NEXTREPO=$(jq -r '.repos[0].name' build_vars.json )
-            echo "NEXTREPO=${NEXTREPO}" >> $GITHUB_ENV  
- 
-        - name: Set build_vars.json as workflow variable
-          id: set_build_vars2
-          run: |
-           BUILD_VARS_JSON=$(jq -c . build_vars.json)
-           echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}" >> $GITHUB_ENV
-           echo "BUILD_VARS_JSON=${BUILD_VARS_JSON}"
+  
            
