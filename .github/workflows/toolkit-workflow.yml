@@ -36,6 +36,7 @@ jobs:
             git clone https://github.com/cs1867/project.git project
             ls -al project
             cp project/toolbox/workflows/toolkit_test.json .
+            cp project/toolbox/workflows/github-workflow.sh . 
  
         - name: Set build_vars.json as workflow variable
           id: set_build_vars
