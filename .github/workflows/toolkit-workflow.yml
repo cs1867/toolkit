@@ -113,7 +113,7 @@ jobs:
                 'ol8'|'el9')              
                    curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build | sh -s - --run github-el-workflow.sh . '${{ env.BUILD_OS }}'  
                 ;;
-                'd11'|'d12'|'u20'|'u24')                
+                'd11'|'d12'|'u20'|'u22|'u24')                
                   curl -s https://raw.githubusercontent.com/perfsonar/docker-oneshot-builder/main/build | sh -s - --run github-workflow-db-skip-install.sh . '${{ env.BUILD_OS }}'
                 ;;
               esac
